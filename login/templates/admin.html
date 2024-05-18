@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application de Gestion de Bibliothèque</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/vfs_fonts.js"></script>
+</head>
+
+
+    <style>
+
+
+      .custom-badge {
+            background-color: #ffc107; /* Set the background color */
+            color: #212529; /* Set the text color */
+            font-size: 14px; /* Set the font size */
+            font-weight: bold; /* Set the font weight */
+            padding: 6px 10px; /* Set the padding */
+            border-radius: 50%; /* Make it a circle */
+        }
+
+      pdf-icon {
+        color: red;
+        border: none;
+    }
+        .form-container {
+            margin-top: 50px;
+        }
+        body {
+            padding-top: 56px;
+            margin: 0; /* Élimine la marge par défaut du corps */
+            padding: 0; /* Élimine le remplissage par défaut du corps */
+
+        }
+        nav {
+            background-color: #28a745;
+            padding: 15px;
+            position: fixed;
+            height: 100%;
+            width: 250px;
+        }
+        nav a {
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        section {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        footer {
+            background-color: #f8f9fa;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .custom-margin-left {
+    margin-left: 150px; /* ou n'importe quelle valeur que vous préférez */
+}
+
+        header {
+            height: 80px;
+            width: 100%;
+            display: flex;
+            align-items: center; /* Centre verticalement les éléments dans le header */
+        }
+
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+<nav class="navbar navbar-dark bg-success flex-column fixed-top">
+    <a class="navbar-brand" href="#"><i class="fas fa-book"></i> Menu</a>
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link" href="#gestionLivres" onclick="afficherSectionGestionLivres()">Gestion des Livres</a>
+        </li>
+        <li class="nav-item"><a class="nav-link" href="#membres">Gestion des Membres</a></li>
+        <li class="nav-item"><a class="nav-link" href="#emprunts">Gestion des Emprunts</a></li>
+        <li class="nav-item"><a class="nav-link" href="#amendes">Gestion des Amendes</a></li>
+        <li class="nav-item"><a class="nav-link" href="#statistiques">Statistiques et Rapports</a></li>
+        <li class="nav-item"><a class="nav-link" href="#droits">Gestion des Droits d'Accès</a></li>
+        <li class="nav-item"><a class="nav-link" href="#configuration">Configuration du Système</a></li>
+        <li class="nav-item"><a class="nav-link" href="#journal">Journal d'Activité</a></li>
+        <li class="nav-item"><a class="nav-link" href="#reservations">Gestion des Réservations</a></li>
+        <li class="nav-item"><a class="nav-link" href="#sauvegarde">Système de Sauvegarde et de Récupération</a></li>
+        <li class="nav-item"><a class="nav-link" href="#maintenance">Maintenance Générale</a></li>
+    </ul>
+</nav>
+</div>
+<header class="bg-white shadow custom-margin-left">
+    <div class="container d-flex align-items-center justify-content-center">
+        <div>
+            <form class="form-inline">
+                <input class="form-control mr-sm-2" type="search" placeholder="Rechercher" aria-label="Search">
+                <button class="btn btn-outline-dark my-2 my-sm-0" type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+        <div class="ml-auto text-right">
+            <a href="#" class="text-dark ml-3">
+                <i class="fas fa-bell"></i> Boîte de Notification
+            </a>
+            <a href="#" class="text-dark ml-3">
+                <i class="fas fa-envelope"></i> Boîte de Messagerie
+            </a>
+            <div class="dropdown d-inline ml-3">
+                <a href="#" class="text-dark dropdown-toggle" id="profileDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-user"></i> {{ session.username }}
+                </a>
+                <div class="dropdown-menu" aria-labelledby="profileDropdown">
+                    <a class="dropdown-item" href="#">Profil</a>
+                    <a class="dropdown-item" href="#">Paramètres</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="{{ url_for('logout') }}">Déconnexion</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Modal pour afficher le message de succès -->
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="successModalLabel">Livre ajouté avec succès</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Le livre a été ajouté avec succès à la bibliothèque.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <section id="gestionLivres">
+        <h2>Gestion des Livres</h2>
+
+        <div class="container">
+            <div class="row form-container d-flex">
+                <div class="col-md-6">
+<form class="border rounded shadow p-4" method="POST"  action="/add_book" onsubmit="showSuccessModal()">
+    <h3 class="mb-4">Ajout de Livre</h3>
+    <div class="form-group">
+        <label for="titre">Titre :</label>
+        <input type="text" class="form-control" id="titre" name="titre" required>
+    </div>
+    <div class="form-group">
+        <label for="auteur">Auteur :</label>
+        <input type="text" class="form-control" id="auteur" name="auteur" required>
+    </div>
+    <div class="form-group">
+        <label for="sommaire">Sommaire :</label>
+        <textarea class="form-control" id="sommaire" name="sommaire" rows="3"></textarea>
+    </div>
+    <div class="form-group">
+        <label for="nbr_pages">Nombre de pages :</label>
+        <input type="number" class="form-control" id="nbr_pages" name="nbr_pages" min="1">
+    </div>
+    <div class="form-group">
+        <label for="categorie">Catégorie :</label>
+        <input type="text" class="form-control" id="categorie" name="categorie">
+    </div>
+    <div class="form-group">
+        <label for="source">Source :</label>
+        <input type="text" class="form-control" id="source" name="source">
+    </div>
+    <div class="form-group">
+        <label for="quantite">Quantité :</label>
+        <input type="number" class="form-control" id="quantite" name="quantite" min="1">
+    </div>
+<button type="button" onclick="generatePDF()" class="btn btn-primary">Générer PDF</button>
+
+    <button type="submit" class="btn btn-success">Ajouter</button>
+</form>
+                </div>
+                <div class="col-md-6">
+
+<form class="border rounded shadow p-4" method="POST" action="/modify_books">
+    <h3 class="mb-4">Modification de Livre</h3>
+    <div class="form-group">
+        <label for="titreModif">Titre :</label>
+        <input type="text" class="form-control" id="titreModif" name="titreModif" required>
+    </div>
+    <div class="form-group">
+        <label for="auteurModif">Auteur :</label>
+        <input type="text" class="form-control" id="auteurModif" name="auteurModif" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Rechercher</button>
+</form>
+<tbody>
+    {% for book in results %}
+
+
+    <tr id="formRow_{{ book._id }}" style="display: none;">
+        <td colspan="8">
+            <form id="modifyForm_{{ book._id }}" method="POST" action="/modify_book/{{ book._id }}">
+                    <h2>Résultats de la Recherche</h2>
+
+                    <table class="table shadow">
+                    <tr>
+                        <td><label for="titreModif_{{ book._id }}">Titre :</label></td>
+                        <td><input type="text" id="titreModif_{{ book._id }}" name="titreModif" value="{{ book.titre }}" class="form-control" required></td>
+
+                        <td><label for="auteurModif_{{ book._id }}">Auteur :</label></td>
+                        <td><input type="text" id="auteurModif_{{ book._id }}" name="auteurModif" value="{{ book.auteur }}" class="form-control" required></td>
+                    </tr>
+                    <tr>
+                        <td><label for="sommaireModif_{{ book._id }}">Sommaire :</label></td>
+                        <td><textarea id="sommaireModif_{{ book._id }}" name="sommaireModif" rows="3" class="form-control">{{ book.sommaire }}</textarea></td>
+
+                        <td><label for="nbr_pagesModif_{{ book._id }}">Nombre de pages :</label></td>
+                        <td><input type="text" id="nbr_pagesModif_{{ book._id }}" name="nbr_pagesModif" value="{{ book.nbr_pages }}" class="form-control" required></td>
+                    </tr>
+                    <tr>
+                        <td><label for="categorieModif_{{ book._id }}">Catégorie :</label></td>
+                        <td><input type="text" id="categorieModif_{{ book._id }}" name="categorieModif" value="{{ book.categorie }}" class="form-control"></td>
+
+                        <td><label for="sourceModif_{{ book._id }}">Source :</label></td>
+                        <td><input type="text" id="sourceModif_{{ book._id }}" name="sourceModif" value="{{ book.source }}" class="form-control"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="quantiteModif_{{ book._id }}">Quantité :</label></td>
+                        <td><input type="number" id="quantiteModif_{{ book._id }}" name="quantiteModif" value="{{ book.quantite }}" class="form-control" min="1"></td>
+
+                        <td colspan="2">
+                            <button type="submit" class="btn btn-danger btn-sm ansi-green-bg">Enregistrer</button>
+                            <button type="button" class="btn btn-danger btn-sm ansigray" onclick="cancelChanges('{{ book._id }}')">Annuler</button>
+                                      <button class="btn btn-danger btn-sm" onclick="deleteBook('{{ book._id }}')">Supprimer</button>
+
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+
+
+
+
+                    <!-- Add modification form for a selected book here -->
+                    <div>
+                        <!-- The modification form goes here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr>
+
+<div class="border rounded shadow p-4">
+    <h3>Liste des Livres</h3>
+
+    <form id="searchForm" class="border rounded p-4 form-inline" method="GET" action="/search_books">
+        <div class="form-group mx-sm-3 mb-2">
+            <label for="titre2">Titre :</label>
+            <input type="text" class="form-control" id="titre2" name="titre">
+        </div>
+        <div class="form-group mx-sm-3 mb-2">
+            <label for="auteur2">Auteur :</label>
+            <input type="text" class="form-control" id="auteur2" name="auteur">
+        </div>
+        <div class="form-group mx-sm-3 mb-2">
+            <label for="categorie2">Catégorie :</label>
+            <input type="text" class="form-control" id="categorie2" name="categorie">
+        </div>
+        <div class="form-group mx-sm-3 mb-2">
+            <label for="source2">Source :</label>
+            <input type="text" class="form-control" id="source2" name="source">
+        </div>
+        <button type="submit" class="btn btn-primary mb-2">Rechercher</button>
+    </form>
+
+    <table class="table border rounded shadow">
+        <thead>
+            <tr>
+                <th>Titre</th>
+                <th>Auteur</th>
+                <th>Sommaire</th>
+                <th>Nombre de Pages</th>
+                <th>Catégorie</th>
+                <th>Source</th>
+                <th>Quantité</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Utilisez une boucle pour afficher les résultats -->
+            {% for book in search_results %}
+                <tr>
+                    <td>{{ book.titre }}</td>
+                    <td>{{ book.auteur }}</td>
+                    <td>{{ book.sommaire }}</td>
+                    <td>{{ book.nbr_pages }}</td>
+                    <td>{{ book.categorie }}</td>
+                    <td>{{ book.source }}</td>
+                    <td>{{ book.quantite }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+    </section>
+
+    <section id="membres">
+        <h2>Gestion des Membres</h2>
+        <!-- Contenu de la gestion des membres -->
+    </section>
+
+    <footer class="text-center">
+        <p>&copy; 2024 Bibliothèque XYZ</p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        function afficherSectionGestionLivres() {
+            var gestionLivresSection = document.getElementById('gestionLivres');
+            var forms = gestionLivresSection.querySelectorAll('form');
+
+            gestionLivresSection.style.display = gestionLivresSection.style.display === 'none' ? 'block' : 'none';
+
+            forms.forEach(function (form) {
+                form.style.display = gestionLivresSection.style.display;
+            });
+        }
+    </script>
+<script>
+
+    function createModal(message, callback) {
+    // Create modal container
+    var modalContainer = document.createElement("div");
+    modalContainer.className = "modal fade";
+
+    // Create modal dialog
+    var modalDialog = document.createElement("div");
+    modalDialog.className = "modal-dialog";
+
+    // Create modal content
+    var modalContent = document.createElement("div");
+    modalContent.className = "modal-content";
+
+    // Create modal body
+    var modalBody = document.createElement("div");
+    modalBody.className = "modal-body";
+
+    // Create message element
+    var messageElement = document.createElement("p");
+    messageElement.textContent = message;
+
+    // Create confirm button
+    var confirmButton = document.createElement("button");
+    confirmButton.className = "btn btn-primary";
+    confirmButton.textContent = "Confirm";
+    confirmButton.addEventListener("click", function () {
+        // Close modal
+        $(modalContainer).modal('hide');
+        // Execute callback function if provided
+        if (typeof callback === "function") {
+            callback();
+        }
+    });
+
+    // Create cancel button
+    var cancelButton = document.createElement("button");
+    cancelButton.className = "btn btn-secondary";
+    cancelButton.textContent = "Cancel";
+    cancelButton.addEventListener("click", function () {
+        // Close modal
+        $(modalContainer).modal('hide');
+    });
+
+    // Append elements to modal body
+    modalBody.appendChild(messageElement);
+    modalBody.appendChild(confirmButton);
+    modalBody.appendChild(cancelButton);
+
+    // Append modal body to modal content
+    modalContent.appendChild(modalBody);
+
+    // Append modal content to modal dialog
+    modalDialog.appendChild(modalContent);
+
+    // Append modal dialog to modal container
+    modalContainer.appendChild(modalDialog);
+
+    // Append modal container to body
+    document.body.appendChild(modalContainer);
+
+    // Activate Bootstrap modal
+    $(modalContainer).modal('show');
+}
+
+// Function to delete a book
+function deleteBook(bookId) {
+    // Confirm deletion using modal
+    createModal("Are you sure you want to delete this book?", function () {
+        // If confirmed, proceed with deletion
+        fetch("/delete_book/" + bookId, {
+            method: "DELETE"
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove the row from the table if deletion is successful
+                document.getElementById("row_" + bookId).remove();
+            } else {
+                alert("Failed to delete the book.");
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+        });
+    });
+}
+</script>
+
+
+
+<script>
+   function showSuccessModal() {
+   $('#successModal').modal('show');
+}
+
+$(document).ready(function () {
+   $('#successModal').on('hidden.bs.modal', function () {
+      $('#livreForm')[0].reset();
+   });
+
+   $('#livreForm').submit(function (event) {
+      event.preventDefault();
+      showSuccessModal();
+   });
+});
+
+</script>
+<script>
+   function modifyBook(bookId) {
+      // Cacher le texte, afficher le formulaire
+      document.getElementById("row_" + bookId).style.display = 'none';
+      document.getElementById("formRow_" + bookId).style.display = 'table-row';
+   }
+
+   function cancelChanges(bookId) {
+      // Cacher le formulaire, afficher le texte
+      document.getElementById("formRow_" + bookId).style.display = 'none';
+      document.getElementById("row_" + bookId).style.display = 'table-row';
+   }
+
+   function saveChanges(bookId) {
+      // Envoyer le formulaire au serveur pour sauvegarde
+      var form = document.getElementById("modifyForm_" + bookId);
+      // Ajouter le code ici pour envoyer les modifications au serveur (par exemple, avec AJAX)
+      console.log("Modifications enregistrées pour le livre avec l'ID " + bookId);
+      // Cacher le formulaire, afficher le texte
+      document.getElementById("formRow_" + bookId).style.display = 'none';
+      document.getElementById("row_" + bookId).style.display = 'table-row';
+      return false; // Pour éviter la soumission normale du formulaire
+   }
+</script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+      $(document).ready(function () {
+        $('#piece_jointe').change(function () {
+            var fileName = $(this).val().split('\\').pop();
+            if (fileName.toLowerCase().endsWith('.pdf')) {
+                $('#pdf-icon-container').show();
+                $('#pdf-icon').addClass('text-danger');
+                $('#file-upload-container').hide(); // Masque le conteneur du champ de téléchargement
+            } else {
+                $('#pdf-icon-container').hide();
+            }
+        });
+    });
+</script>
+
+
+<script>
+
+var titleStyle = { fontSize: 18, bold: true, margin: [0, 0, 0, 10], alignment: 'center', color: 'green' };
+var globalStyle = { fontSize: 14, margin: [0, 0, 0, 10], bold: false, alignment: 'left', fillColor: '#f2f2f2' };
+
+function generatePDF(username, cin, telephone) {
+    try {
+        // Récupérer les valeurs des champs du formulaire
+        var titreValue = document.getElementById('titre').value;
+        var auteurValue = document.getElementById('auteur').value;
+        var sommaireValue = document.getElementById('sommaire').value;
+        var nbrPagesValue = document.getElementById('nbr_pages').value;
+        var categorieValue = document.getElementById('categorie').value;
+        var sourceValue = document.getElementById('source').value;
+        var quantiteValue = document.getElementById('quantite').value;
+
+        // Obtenir la date actuelle
+        var currentDate = new Date();
+        var formattedDate = currentDate.toLocaleDateString(); // Vous pouvez formater la date selon vos besoins
+
+        username = '{{ session["username"] }}';
+        cin = '{{ session["cin"] }}';
+        telephone = '{{ session["telephone"] }}';
+
+        var tableStyle = {
+    ...globalStyle,
+    margin: [0, 10, 0, 10],
+    table: {
+        widths: ['auto', '*'],
+        body: [
+            ['Titre', titreValue],
+            ['Auteur', auteurValue],
+            ['Sommaire', sommaireValue],
+            ['Nombre de pages', nbrPagesValue],
+            ['Catégorie', categorieValue],
+            ['Source', sourceValue],
+            ['Quantité', quantiteValue],
+            ['Date d\'ajout', formattedDate],
+            ['Position d\'ajout', 'BERKANE'],
+            ['Nom d\'utilisateur', username],
+            ['CIN', cin],
+            ['Téléphone', telephone],
+        ]
+    },
+    layout: 'lightHorizontalLines',
+    fillColor: 'lightgreen', // Ajout de la couleur de fond
+};
+
+var schoolsTable = {
+    ...globalStyle,
+    margin: [0, 10, 0, 10],
+    table: {
+        body: [
+            ['Local au Maroc', 'École nationale des sciences appliquées d\'Alhoceima\nCtre Ait Youssef Ou Ali 32003', { text: 'Localisation sur Google Maps', link: 'https://maps.app.goo.gl/KAvGfQ5SG7W7YvCp7', color: 'green' }, { image: getBase64Image('static/ensah.png'), width: 50, alignment: 'center' }],
+            ['Local en France', 'École Nationale Supérieure d\'Informatique pour l\'Industrie et l\'Entreprise (ENSIIE)\n1 square de la Résistance, 91000 Évry-Courcouronnes', { text: 'Localisation sur Google Maps', link: 'https://maps.app.goo.gl/HXP5VAjUhHUDR6267', color: 'green' }, { image: getBase64Image('static/ensiie.png'), width: 50, alignment: 'center' }],
+        ]
+    },
+    layout: 'lightHorizontalLines',
+};
+
+
+        // Styles pour le tableau des images
+        var imageTableStyle = {
+            ...globalStyle,
+            margin: [0, 10, 0, 10],
+            table: {
+                widths: ['*', '*'],
+                body: [
+                    [
+                        { text: 'Tempon :', alignment: 'center' },
+                        { text: 'Signature :', alignment: 'center' }
+                    ],
+                    [
+                        { image: getBase64Image('static/tempon.png'), width: 100, alignment: 'center' },
+                        { image: getBase64Image('static/signature.png'), width: 100, alignment: 'center' }
+                    ]
+                ]
+            },
+            layout: 'noBorders',
+        };
+
+        // Table for working hours
+        var workingHoursTable = {
+            ...globalStyle,
+            margin: [0, 10, 0, 10],
+            table: {
+                widths: ['auto', 'auto'],
+                body: [
+                    ['Horaires de travail (Matin)', '8h30 - 12h30'],
+                    ['Horaires de travail (Soir)', '14h00 - 18h30'],
+                ]
+            },
+            layout: 'lightHorizontalLines',
+        };
+
+        var headerContent = [
+            [
+                { text: 'ENSIIE - IMT', style: { fontSize: 12, bold: true, alignment: 'left' } },
+                { text: 'ENSAH', style: { fontSize: 12, bold: true, alignment: 'left' } }
+            ]
+        ];
+
+        var docDefinition = {
+            pageMargins: { left: 40, top: 40, right: 40, bottom: 40, background: '#00FF00' },
+            content: [
+                headerContent,
+                { text: 'Ajout de Livre', style: titleStyle },
+                { text: 'Informations du Livre', style: titleStyle },
+                tableStyle,  // Ajouter le tableau avec les informations
+                { text: 'Informations sur les Écoles', style: titleStyle },
+                schoolsTable,  // Ajouter le tableau avec les informations sur les écoles
+                imageTableStyle,  // Ajouter le tableau avec les images
+                workingHoursTable,  // Ajouter le tableau des horaires de travail
+                // Ajoutez plus de contenu au besoin
+            ]
+        };
+
+        pdfMake.createPdf(docDefinition).download('formulaire.pdf');
+
+    } catch (error) {
+        console.error("Erreur lors de la génération du PDF :", error);
+    }
+}
+
+function getBase64Image(path) {
+    var img = new Image();
+    img.src = path;
+    var canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+    var dataURL = canvas.toDataURL("image/png");
+    return dataURL;
+}
+
+generatePDF(
+    '{{ session["username"] }}',
+    '{{ session["cin"] }}',
+    '{{ session["telephone"] }}'
+);
+
+</script>
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,67 @@
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white text-center">
+                    <h1>Welcome, {{ user_info.username }}!</h1>
+                </div>
+                <div class="card-body chat-container">
+                    <div class="text-center mb-4">
+                        <h5 class="card-title">MIMOUNE HOUBAOUI</h5>
+                        <p class="card-text">Administrateur et Gestionnaire Multimédia de ENS-AH-IIE BIBLIO</p>
+                        <img src="{{ url_for('static', filename='mimoun.png') }}" class="rounded-circle" alt="User Photo" style="width: 100px; height: 100px;">
+                    </div>
+                    <div id="chatMessages" class="mb-3"></div>
+                    <form id="chatForm" class="d-flex flex-column align-items-start">
+                        <div class="form-group">
+                            <label for="userName">User Name:</label>
+                            <input type="text" class="form-control" id="userName" value="{{ user_info.username }}" readonly>
+                        </div>
+                        <div class="form-group d-flex">
+                            <div class="mr-3">
+                                <label for="messageType">Message Type:</label>
+                                <select class="form-control" id="messageType" required>
+                                    <option value="text"><i class="fas fa-font"></i> Text</option>
+                                    <option value="audio"><i class="fas fa-microphone"></i> Audio</option>
+                                    <option value="file"><i class="fas fa-file"></i> File</option>
+                                </select>
+                            </div>
+                            <div id="textMessageInput" class="flex-grow-1 form-group">
+                                <label for="textMessage">Text Message:</label>
+                                <textarea class="form-control" id="textMessage" rows="3" required></textarea>
+                            </div>
+                        </div>
+                        <div id="audioMessageInput" class="form-group" style="display: none;">
+                            <label for="audioMessage">Audio Message:</label>
+                            <div class="audio-container">
+                                <div class="d-flex justify-content-start align-items-center">
+                                    <canvas id="frequencyCanvas" style="width: 50px; height: 50px; border: 1px solid #ccc;"></canvas>
+                                    <div class="ml-3">
+                                        <audio id="audioMessage" controls class="mw-100 custom-audio"
+                                               style="background-color: #f0f0f0; border: 2px solid #333; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); font-family: 'Arial', sans-serif; font-size: 16px; text-align: center; background:#25D366; color: #ffffff;">
+                                        </audio>
+                                    </div>
+                                    <div class="ml-3 d-flex align-items-center">
+                                        <button id="startButton" class="btn btn-primary rounded-circle" onclick="startRecording()"
+                                                style="background-color: #4CAF50;">
+                                            <i class="fas fa-play-circle"></i>
+                                        </button>
+                                        <button id="stopButton" class="btn btn-danger ml-2 rounded-circle" onclick="stopRecording()"
+                                                style="display: none; background-color: #4CAF50;">
+                                            <i class="fas fa-stop-circle"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="fileMessageInput" class="form-group" style="display: none;">
+                            <label for="fileMessage">File Message:</label>
+                            <input type="file" class="form-control-file" id="fileMessage" accept=".txt, .pdf, .doc, .docx">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
